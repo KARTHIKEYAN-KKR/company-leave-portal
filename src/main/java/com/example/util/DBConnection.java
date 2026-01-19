@@ -22,8 +22,11 @@ public class DBConnection {
 
         if (envUrl != null && !envUrl.isEmpty()) {
             envUrl = envUrl.trim(); // Fix: Trim accidental spaces or characters
-            // Fix: Render/Neon provides "postgres://", but JDBC needs "jdbc:postgresql://"
-            if (envUrl.startsWith("postgres://")) {
+            // Fix: Render/Neon can provide "postgres://" or "postgresql://"
+            // We must handle "postgresql://" FIRST because it is longer.
+            if (envUrl.startsWith("postgresql://")) {
+                envUrl = envUrl.replace("postgresql://", "jdbc:postgresql://");
+            } else if (envUrl.startsWith("postgres://")) {
                 envUrl = envUrl.replace("postgres://", "jdbc:postgresql://");
             }
             return DriverManager.getConnection(envUrl);
