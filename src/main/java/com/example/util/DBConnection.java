@@ -21,6 +21,7 @@ public class DBConnection {
         String envUrl = System.getenv("DATABASE_URL");
 
         if (envUrl != null && !envUrl.isEmpty()) {
+            envUrl = envUrl.trim(); // Fix: Trim accidental spaces or characters
             // Fix: Render/Neon provides "postgres://", but JDBC needs "jdbc:postgresql://"
             if (envUrl.startsWith("postgres://")) {
                 envUrl = envUrl.replace("postgres://", "jdbc:postgresql://");
