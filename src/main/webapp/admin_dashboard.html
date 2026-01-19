@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Employee Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            width: 95%;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            color: white;
+            margin-top: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid white;
+            padding: 0.5rem 1rem;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-PENDING {
+            background: rgba(250, 204, 21, 0.2);
+            color: #facc15;
+        }
+
+        .status-APPROVED {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .status-REJECTED {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+        }
+
+        .action-btn {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .btn-approve {
+            background: #4ade80;
+            color: #064e3b;
+        }
+
+        .btn-reject {
+            background: #f87171;
+            color: #7f1d1d;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <div class="header">
+            <h2>Admin Dashboard</h2>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+
+        <div class="card">
+            <h3>All Leave Requests</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Type</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        // simple check
+
+
+        if (!user || user.role !== 'ADMIN') {
+            window.location.href = 'index.html';
+        }
+
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+
+        async function loadAllLeaves() {
+            try {
+                // Pass role=ADMIN to trigger the admin logic in servlet
+                const res = await fetch('http://localhost:8080/employee-leave-tracker/api/leaves?role=ADMIN');
+                if (res.ok) {
+                    const leaves = await res.json();
+                    renderTable(leaves);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function renderTable(leaves) {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = leaves.map(l => `
+                <tr>
+                    <td>${l.empId}</td>
+                    <td>${l.leaveType}</td>
+                    <td>${l.startDate}</td>
+                    <td>${l.endDate}</td>
+                    <td>${l.reason}</td>
+                    <td><span class="status-badge status-${l.status}">${l.status}</span></td>
+                    <td>
+                        ${l.status === 'PENDING' ? `
+                            <button onclick="updateStatus(${l.reqId}, 'APPROVED')" class="action-btn btn-approve">Approve</button>
+                            <button onclick="updateStatus(${l.reqId}, 'REJECTED')" class="action-btn btn-reject">Reject</button>
+                        ` : '-'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function updateStatus(reqId, status) {
+            if (!confirm(`Are you sure you want to mark this as ${status}?`)) return;
+
+            try {
+                const res = await fetch('http://localhost:8080/employee-leave-tracker/api/leaves', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reqId, status })
+                });
+
+                if (res.ok) {
+                    loadAllLeaves(); // Refresh
+                } else {
+                    alert('Failed to update status');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        loadAllLeaves();
+    </script>
+</body>
+
+</html>
