@@ -159,7 +159,8 @@
         // Load Leaves
         async function loadLeaves() {
             try {
-                const res = await fetch(`http://localhost:8080/employee-leave-tracker/api/leaves?empId=${user.empId}`);
+                // Use relative AP path
+                const res = await fetch(`api/leaves?empId=${user.empId}`);
                 if (res.ok) {
                     const leaves = await res.json();
                     const tbody = document.getElementById('leaveTableBody');
@@ -192,7 +193,7 @@
             msg.textContent = 'Submitting...';
 
             try {
-                const res = await fetch('http://localhost:8080/employee-leave-tracker/api/leaves', {
+                const res = await fetch('api/leaves', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

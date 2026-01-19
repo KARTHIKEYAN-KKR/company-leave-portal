@@ -142,8 +142,8 @@
 
         async function loadAllLeaves() {
             try {
-                // Pass role=ADMIN to trigger the admin logic in servlet
-                const res = await fetch('http://localhost:8080/employee-leave-tracker/api/leaves?role=ADMIN');
+                // Use relative API path.
+                const res = await fetch('api/leaves?role=ADMIN');
                 if (res.ok) {
                     const leaves = await res.json();
                     renderTable(leaves);
@@ -175,7 +175,7 @@
             if (!confirm(`Are you sure you want to mark this as ${status}?`)) return;
 
             try {
-                const res = await fetch('http://localhost:8080/employee-leave-tracker/api/leaves', {
+                const res = await fetch('api/leaves', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ reqId, status })

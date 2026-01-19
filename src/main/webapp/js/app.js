@@ -11,7 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
             errorMsg.textContent = 'Logging in...';
 
             try {
-                const response = await fetch('http://localhost:8080/employee-leave-tracker/api/employees/login', {
+                // Use relative path for API. 
+                // Render deploys as ROOT, so we access /api/* directly.
+                const response = await fetch('api/employees/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
