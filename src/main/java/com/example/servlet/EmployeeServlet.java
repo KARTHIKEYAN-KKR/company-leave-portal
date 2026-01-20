@@ -59,8 +59,11 @@ public class EmployeeServlet extends HttpServlet {
                 resp.getWriter().write("{\"error\": \"Invalid Credentials\"}");
             }
         } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            e.printStackTrace(resp.getWriter());
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // Use 500 for server errors
+            e.printStackTrace(); // Log to server logs
+            // Return clean JSON error
+            String errorMessage = e.getMessage() != null ? e.getMessage() : "Unknown Login Error";
+            resp.getWriter().write(gson.toJson(new ErrorResponse(errorMessage)));
         }
     }
 
@@ -68,5 +71,13 @@ public class EmployeeServlet extends HttpServlet {
     static class LoginRequest {
         String email;
         String password;
+    }
+
+    static class ErrorResponse {
+        String error;
+
+        public ErrorResponse(String error) {
+            this.error = error;
+        }
     }
 }
