@@ -3,6 +3,7 @@ package com.example.util;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.net.URI;
 
 public class DBConnection {
 
@@ -21,15 +22,44 @@ public class DBConnection {
         String envUrl = System.getenv("DATABASE_URL");
 
         if (envUrl != null && !envUrl.isEmpty()) {
-            envUrl = envUrl.trim(); // Fix: Trim accidental spaces or characters
-            // Fix: Render/Neon can provide "postgres://" or "postgresql://"
-            // We must handle "postgresql://" FIRST because it is longer.
-            if (envUrl.startsWith("postgresql://")) {
-                envUrl = envUrl.replace("postgresql://", "jdbc:postgresql://");
-            } else if (envUrl.startsWith("postgres://")) {
-                envUrl = envUrl.replace("postgres://", "jdbc:postgresql://");
+            try {
+                // Parse the Render/Neon URI (postgres://user:pass@host:port/db)
+                URI uri = new URI(envUrl.trim());
+                
+                // Extract parts
+                String host = uri.getHost();
+                int port = uri.getPort() == -1 ? 5432 : uri.getPort();
+                String dbName = uri.getPath(); // includes leading /
+                String info = uri.getUserInfo();
+                String query = uri.getQuery();
+
+                String user = "";
+                String pass = "";
+
+                if (info != null) {
+                    String[] parts = info.split(":");
+                    user = parts[0];
+                    if (parts.length > 1) pass = parts[1];
+                }
+
+                // Construct Standard JDBC URL (jdbc:postgresql://host:port/db?user=u&password=p)
+                String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + dbName;
+                
+                // Append Query Params (sslmode, etc.) and Credentials
+                String credentials = "user=" + user + "&password=" + pass;
+                if (query != null) {
+                    jdbcUrl += "?" + query + "&" + credentials;
+                } else {
+                    jdbcUrl += "?" + credentials;
+                }
+
+                return DriverManager.getConnection(jdbcUrl);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                // If parsing fails, try raw or throw suitable error
+                throw new SQLException("Failed to parse DATABASE_URL: " + e.getMessage());
             }
-            return DriverManager.getConnection(envUrl);
         }
 
         // 2. Fallback: Manually constructed URL (Local testing)
