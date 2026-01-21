@@ -52,6 +52,12 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            /* Smooth scroll on iOS */
+        }
+
         .status-badge {
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
@@ -105,22 +111,24 @@
 
         <div class="card">
             <h3>All Leave Requests</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Employee ID</th>
-                        <th>Type</th>
-                        <th>From</th>
-                        <th>To</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="adminTableBody">
-                    <!-- Populated by JS -->
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Type</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
