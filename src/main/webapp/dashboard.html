@@ -8,9 +8,18 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        body {
+            display: block;
+            /* Override global flex centering */
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
         .dashboard-container {
             max-width: 1000px;
             width: 95%;
+            margin: 0 auto;
+            /* Center horizontally */
             display: grid;
             grid-template-columns: 1fr 2fr;
             gap: 2rem;
